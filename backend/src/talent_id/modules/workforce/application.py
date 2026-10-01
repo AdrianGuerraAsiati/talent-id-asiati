@@ -1,3 +1,4 @@
+from datetime import time
 from uuid import UUID
 
 from talent_id.modules.workforce.domain import (
@@ -20,12 +21,21 @@ class WorkforceService:
     def create_site(self, *, name: str, timezone: str, code: str | None = None) -> Site:
         return self._repository.create_site(Site(name=name, timezone=timezone, code=code))
 
+    def get_site(self, site_id: UUID) -> Site:
+        site = self._repository.get_site(site_id)
+        if site is None:
+            raise WorkforceNotFoundError("site not found")
+        return site
+
+    def site_exists(self, site_id: UUID) -> bool:
+        return self._repository.get_site(site_id) is not None
+
     def create_schedule(
         self,
         *,
         name: str,
-        start_time,
-        end_time,
+        start_time: time,
+        end_time: time,
         tolerance_minutes: int,
     ) -> WorkSchedule:
         return self._repository.create_schedule(
@@ -47,27 +57,24 @@ class WorkforceService:
         schedule_id: UUID | None,
         attendance_eligible: bool,
     ) -> EmployeeProjection:
-        if site_id is not None and self._repository.get_site(site_id) is None:
+        if site_id is not None and not self.site_exists(site_id):
             raise WorkforceNotFoundError("site not found")
         if schedule_id is not None and self._repository.get_schedule(schedule_id) is None:
             raise WorkforceNotFoundError("schedule not found")
 
         existing = self._repository.get_employee_by_external_id(external_employee_id)
-        employee = EmployeeProjection(
-            employee_id=existing.employee_id if existing else None,  # type: ignore[arg-type]
-            external_employee_id=external_employee_id,
-            display_name=display_name,
-            status=status,
-            site_id=site_id,
-            schedule_id=schedule_id,
-            attendance_eligible=attendance_eligible,
-        ) if existing else EmployeeProjection(
-            external_employee_id=external_employee_id,
-            display_name=display_name,
-            status=status,
-            site_id=site_id,
-            schedule_id=schedule_id,
-            attendance_eligible=attendance_eligible,
+        common = {
+            "external_employee_id": external_employee_id,
+            "display_name": display_name,
+            "status": status,
+            "site_id": site_id,
+            "schedule_id": schedule_id,
+            "attendance_eligible": attendance_eligible,
+        }
+        employee = (
+            EmployeeProjection(employee_id=existing.employee_id, **common)
+            if existing is not None
+            else EmployeeProjection(**common)
         )
         return self._repository.upsert_employee(employee)
 
