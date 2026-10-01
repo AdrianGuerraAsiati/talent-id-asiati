@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 
 from talent_id.modules.biometrics.domain import BiometricEnrollment
 from talent_id.modules.biometrics.models import BiometricEnrollmentModel
+from talent_id.shared.time import as_utc
 
 
 class BiometricEnrollmentRepository:
@@ -45,5 +46,5 @@ class BiometricEnrollmentRepository:
             provider_user_id=model.provider_user_id,
             face_count=model.face_count,
             active=model.active,
-            enrolled_at=model.enrolled_at,
+            enrolled_at=as_utc(model.enrolled_at),
         )
