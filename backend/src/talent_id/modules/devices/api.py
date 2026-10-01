@@ -2,28 +2,22 @@ from typing import Annotated
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, Header, HTTPException, status
-from sqlalchemy.orm import Session
 
 from talent_id.modules.devices.application import (
     DeviceNotFoundError,
-    DeviceProvisioningService,
     InvalidDeviceCredentialsError,
     InvalidDeviceSiteError,
 )
-from talent_id.modules.devices.repository import DeviceRepository
+from talent_id.modules.devices.dependencies import DeviceServiceDependency
 from talent_id.modules.devices.schemas import (
     DeviceProvisionRequest,
     DeviceProvisionResponse,
     DeviceResponse,
     KioskContextResponse,
 )
-from talent_id.modules.workforce.application import (
-    WorkforceNotFoundError,
-    WorkforceService,
-)
-from talent_id.modules.workforce.repository import WorkforceRepository
+from talent_id.modules.workforce.application import WorkforceNotFoundError
+from talent_id.modules.workforce.dependencies import WorkforceServiceDependency
 from talent_id.shared.auth import require_internal_key
-from talent_id.shared.db import get_session
 
 router = APIRouter(
     prefix="/v1/devices",
@@ -32,25 +26,15 @@ router = APIRouter(
 )
 kiosk_router = APIRouter(prefix="/v1/kiosk", tags=["kiosk"])
 
-SessionDependency = Annotated[Session, Depends(get_session)]
 DeviceIdHeader = Annotated[UUID, Header(alias="X-Device-Id")]
 DeviceSecretHeader = Annotated[str, Header(alias="X-Device-Secret")]
-
-
-def build_services(
-    session: Session,
-) -> tuple[DeviceProvisioningService, WorkforceService]:
-    workforce = WorkforceService(WorkforceRepository(session))
-    devices = DeviceProvisioningService(DeviceRepository(session), workforce)
-    return devices, workforce
 
 
 @router.post("", response_model=DeviceProvisionResponse, status_code=status.HTTP_201_CREATED)
 def provision_device(
     payload: DeviceProvisionRequest,
-    session: SessionDependency,
+    devices: DeviceServiceDependency,
 ) -> DeviceProvisionResponse:
-    devices, _ = build_services(session)
     try:
         device, secret = devices.provision(site_id=payload.site_id, name=payload.name)
     except InvalidDeviceSiteError as exc:
@@ -68,9 +52,8 @@ def provision_device(
 @router.post("/{device_id}/revoke", response_model=DeviceResponse)
 def revoke_device(
     device_id: UUID,
-    session: SessionDependency,
+    devices: DeviceServiceDependency,
 ) -> DeviceResponse:
-    devices, _ = build_services(session)
     try:
         device = devices.revoke(device_id)
     except DeviceNotFoundError as exc:
@@ -89,10 +72,9 @@ def revoke_device(
 def kiosk_context(
     x_device_id: DeviceIdHeader,
     x_device_secret: DeviceSecretHeader,
-    session: SessionDependency,
+    devices: DeviceServiceDependency,
+    workforce: WorkforceServiceDependency,
 ) -> KioskContextResponse:
-    devices, workforce = build_services(session)
-
     try:
         device = devices.authenticate(device_id=x_device_id, secret=x_device_secret)
         site = workforce.get_site(device.site_id)
