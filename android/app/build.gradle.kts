@@ -9,7 +9,7 @@ val apiBaseUrl = providers.gradleProperty("TALENT_ID_API_BASE_URL")
 
 android {
     namespace = "com.asiati.talentid"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.asiati.talentid"
