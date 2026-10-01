@@ -1,3 +1,4 @@
+from typing import Annotated
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -26,13 +27,18 @@ router = APIRouter(
     dependencies=[Depends(require_internal_key)],
 )
 
+SessionDependency = Annotated[Session, Depends(get_session)]
 
-def get_service(session: Session = Depends(get_session)) -> WorkforceService:
+
+def get_service(session: SessionDependency) -> WorkforceService:
     return WorkforceService(WorkforceRepository(session))
 
 
+WorkforceServiceDependency = Annotated[WorkforceService, Depends(get_service)]
+
+
 @router.post("/sites", response_model=SiteResponse, status_code=status.HTTP_201_CREATED)
-def create_site(payload: SiteCreate, service: WorkforceService = Depends(get_service)) -> SiteResponse:
+def create_site(payload: SiteCreate, service: WorkforceServiceDependency) -> SiteResponse:
     try:
         site = service.create_site(name=payload.name, timezone=payload.timezone, code=payload.code)
         return SiteResponse(id=site.site_id, name=site.name, code=site.code, timezone=site.timezone)
@@ -43,7 +49,7 @@ def create_site(payload: SiteCreate, service: WorkforceService = Depends(get_ser
 @router.post("/schedules", response_model=ScheduleResponse, status_code=status.HTTP_201_CREATED)
 def create_schedule(
     payload: ScheduleCreate,
-    service: WorkforceService = Depends(get_service),
+    service: WorkforceServiceDependency,
 ) -> ScheduleResponse:
     try:
         schedule = service.create_schedule(
@@ -67,7 +73,7 @@ def create_schedule(
 def sync_employee(
     external_employee_id: str,
     payload: EmployeeSyncRequest,
-    service: WorkforceService = Depends(get_service),
+    service: WorkforceServiceDependency,
 ) -> EmployeeResponse:
     try:
         employee = service.upsert_employee(
@@ -95,7 +101,7 @@ def sync_employee(
 @router.get("/employees/{external_employee_id}", response_model=EmployeeResponse)
 def get_employee(
     external_employee_id: str,
-    service: WorkforceService = Depends(get_service),
+    service: WorkforceServiceDependency,
 ) -> EmployeeResponse:
     try:
         employee = service.get_employee(external_employee_id)
