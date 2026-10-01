@@ -16,6 +16,10 @@ class AttendanceEventModel(Base):
     device_id: Mapped[UUID | None] = mapped_column(Uuid(as_uuid=True), nullable=True, index=True)
     event_type: Mapped[str] = mapped_column(String(24), nullable=False)
     method: Mapped[str] = mapped_column(String(24), nullable=False)
-    occurred_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, index=True)
+    occurred_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        index=True,
+    )
     idempotency_key: Mapped[str] = mapped_column(String(128), nullable=False, unique=True)
     recognition_confidence: Mapped[float | None] = mapped_column(Float(), nullable=True)
