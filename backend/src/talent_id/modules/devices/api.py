@@ -1,3 +1,4 @@
+from typing import Annotated
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, Header, HTTPException, status
@@ -31,6 +32,10 @@ router = APIRouter(
 )
 kiosk_router = APIRouter(prefix="/v1/kiosk", tags=["kiosk"])
 
+SessionDependency = Annotated[Session, Depends(get_session)]
+DeviceIdHeader = Annotated[UUID, Header(alias="X-Device-Id")]
+DeviceSecretHeader = Annotated[str, Header(alias="X-Device-Secret")]
+
 
 def build_services(
     session: Session,
@@ -43,7 +48,7 @@ def build_services(
 @router.post("", response_model=DeviceProvisionResponse, status_code=status.HTTP_201_CREATED)
 def provision_device(
     payload: DeviceProvisionRequest,
-    session: Session = Depends(get_session),
+    session: SessionDependency,
 ) -> DeviceProvisionResponse:
     devices, _ = build_services(session)
     try:
@@ -63,7 +68,7 @@ def provision_device(
 @router.post("/{device_id}/revoke", response_model=DeviceResponse)
 def revoke_device(
     device_id: UUID,
-    session: Session = Depends(get_session),
+    session: SessionDependency,
 ) -> DeviceResponse:
     devices, _ = build_services(session)
     try:
@@ -82,9 +87,9 @@ def revoke_device(
 
 @kiosk_router.get("/context", response_model=KioskContextResponse)
 def kiosk_context(
-    x_device_id: UUID = Header(alias="X-Device-Id"),
-    x_device_secret: str = Header(alias="X-Device-Secret"),
-    session: Session = Depends(get_session),
+    x_device_id: DeviceIdHeader,
+    x_device_secret: DeviceSecretHeader,
+    session: SessionDependency,
 ) -> KioskContextResponse:
     devices, workforce = build_services(session)
 
