@@ -85,16 +85,11 @@ class WorkforceRepository:
         model.schedule_id = employee.schedule_id
         model.attendance_eligible = employee.attendance_eligible
         self._session.flush()
+        return self._to_domain(model)
 
-        return EmployeeProjection(
-            employee_id=model.id,
-            external_employee_id=model.external_employee_id,
-            display_name=model.display_name,
-            status=EmployeeStatus(model.status),
-            site_id=model.site_id,
-            schedule_id=model.schedule_id,
-            attendance_eligible=model.attendance_eligible,
-        )
+    def get_employee(self, employee_id: UUID) -> EmployeeProjection | None:
+        model = self._session.get(EmployeeProjectionModel, employee_id)
+        return self._to_domain(model) if model is not None else None
 
     def get_employee_by_external_id(self, external_employee_id: str) -> EmployeeProjection | None:
         model = self._session.scalar(
@@ -102,8 +97,10 @@ class WorkforceRepository:
                 EmployeeProjectionModel.external_employee_id == external_employee_id
             )
         )
-        if model is None:
-            return None
+        return self._to_domain(model) if model is not None else None
+
+    @staticmethod
+    def _to_domain(model: EmployeeProjectionModel) -> EmployeeProjection:
         return EmployeeProjection(
             employee_id=model.id,
             external_employee_id=model.external_employee_id,
