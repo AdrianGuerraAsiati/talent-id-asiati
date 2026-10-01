@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.weight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
@@ -49,6 +48,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun TalentIdApp(viewModel: KioskViewModel) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val kioskContext = state.context
 
     MaterialTheme {
         Surface(modifier = Modifier.fillMaxSize()) {
@@ -58,7 +58,7 @@ fun TalentIdApp(viewModel: KioskViewModel) {
                     onProvision = viewModel::provision,
                 )
 
-                state.context == null -> ConnectionScreen(
+                kioskContext == null -> ConnectionScreen(
                     loading = state.loadingContext,
                     error = state.error,
                     onRetry = viewModel::refreshContext,
@@ -66,7 +66,7 @@ fun TalentIdApp(viewModel: KioskViewModel) {
                 )
 
                 else -> KioskScreen(
-                    context = state.context,
+                    context = kioskContext,
                     state = state,
                     onSubmit = viewModel::submitAttendance,
                     onRetryPending = viewModel::retryPending,
