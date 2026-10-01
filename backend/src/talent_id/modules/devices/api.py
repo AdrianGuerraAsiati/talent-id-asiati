@@ -21,9 +21,14 @@ from talent_id.modules.workforce.application import (
     WorkforceService,
 )
 from talent_id.modules.workforce.repository import WorkforceRepository
+from talent_id.shared.auth import require_internal_key
 from talent_id.shared.db import get_session
 
-router = APIRouter(prefix="/v1/devices", tags=["devices"])
+router = APIRouter(
+    prefix="/v1/devices",
+    tags=["devices"],
+    dependencies=[Depends(require_internal_key)],
+)
 kiosk_router = APIRouter(prefix="/v1/kiosk", tags=["kiosk"])
 
 
