@@ -194,7 +194,7 @@ class KioskViewModel(
             401 -> "Este dispositivo no está autorizado."
             404 -> "No pudimos reconocer al empleado."
             409 -> "La marcación ya fue utilizada para otra operación."
-            else -> error.message
+            else -> error.message ?: "Talent ID rechazó la solicitud."
         }
         is IOException -> "No hay conexión con Talent ID."
         else -> "Ocurrió un error al procesar la marcación."
