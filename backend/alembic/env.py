@@ -1,8 +1,8 @@
 from logging.config import fileConfig
 
-from alembic import context
 from sqlalchemy import engine_from_config, pool
 
+from alembic import context
 from talent_id.modules.devices import models as devices_models  # noqa: F401
 from talent_id.modules.workforce import models as workforce_models  # noqa: F401
 from talent_id.shared.config import get_settings
