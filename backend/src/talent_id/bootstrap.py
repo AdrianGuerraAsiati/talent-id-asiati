@@ -1,6 +1,8 @@
 from fastapi import FastAPI
 
 from talent_id import __version__
+from talent_id.modules.biometrics.api import kiosk_router as biometric_kiosk_router
+from talent_id.modules.biometrics.api import router as biometrics_router
 from talent_id.modules.devices.api import kiosk_router
 from talent_id.modules.devices.api import router as devices_router
 from talent_id.modules.workforce.api import router as workforce_router
@@ -19,7 +21,9 @@ def build_application() -> FastAPI:
 
     app.include_router(workforce_router)
     app.include_router(devices_router)
+    app.include_router(biometrics_router)
     app.include_router(kiosk_router)
+    app.include_router(biometric_kiosk_router)
 
     @app.get("/health", tags=["system"])
     def health() -> dict[str, str]:
