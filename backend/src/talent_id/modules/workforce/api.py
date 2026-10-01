@@ -1,14 +1,8 @@
-from typing import Annotated
-
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import Session
 
-from talent_id.modules.workforce.application import (
-    WorkforceNotFoundError,
-    WorkforceService,
-)
-from talent_id.modules.workforce.repository import WorkforceRepository
+from talent_id.modules.workforce.application import WorkforceNotFoundError
+from talent_id.modules.workforce.dependencies import WorkforceServiceDependency
 from talent_id.modules.workforce.schemas import (
     EmployeeResponse,
     EmployeeSyncRequest,
@@ -18,22 +12,12 @@ from talent_id.modules.workforce.schemas import (
     SiteResponse,
 )
 from talent_id.shared.auth import require_internal_key
-from talent_id.shared.db import get_session
 
 router = APIRouter(
     prefix="/v1/workforce",
     tags=["workforce"],
     dependencies=[Depends(require_internal_key)],
 )
-
-SessionDependency = Annotated[Session, Depends(get_session)]
-
-
-def get_service(session: SessionDependency) -> WorkforceService:
-    return WorkforceService(WorkforceRepository(session))
-
-
-WorkforceServiceDependency = Annotated[WorkforceService, Depends(get_service)]
 
 
 @router.post("/sites", response_model=SiteResponse, status_code=status.HTTP_201_CREATED)
