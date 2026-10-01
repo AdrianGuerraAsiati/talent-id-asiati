@@ -65,5 +65,8 @@ class AttendanceService:
         )
         return self._repository.append(event), True
 
+    def get_by_idempotency_key(self, idempotency_key: str) -> AttendanceEvent | None:
+        return self._repository.get_by_idempotency_key(idempotency_key)
+
     def get_last_event(self, employee_id: UUID) -> AttendanceEvent | None:
         return self._repository.get_last_for_employee(employee_id)
