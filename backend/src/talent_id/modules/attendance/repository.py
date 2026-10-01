@@ -9,6 +9,7 @@ from talent_id.modules.attendance.domain import (
     AttendanceMethod,
 )
 from talent_id.modules.attendance.models import AttendanceEventModel
+from talent_id.shared.time import as_utc
 
 
 class AttendanceRepository:
@@ -60,7 +61,7 @@ class AttendanceRepository:
             device_id=model.device_id,
             event_type=AttendanceEventType(model.event_type),
             method=AttendanceMethod(model.method),
-            occurred_at=model.occurred_at,
+            occurred_at=as_utc(model.occurred_at),
             idempotency_key=model.idempotency_key,
             recognition_confidence=model.recognition_confidence,
         )
