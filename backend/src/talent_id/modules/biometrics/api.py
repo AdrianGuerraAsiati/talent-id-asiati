@@ -124,7 +124,7 @@ async def recognize_and_record_attendance(
     namespaced_key = f"{device.device_id}:{idempotency_key}"
     existing = attendance.get_by_idempotency_key(namespaced_key)
     if existing is not None:
-        if existing.device_id != device.device_id:
+        if existing.device_id != device.device_id or existing.event_type != event_type:
             raise HTTPException(status_code=409, detail="idempotency key conflict")
         try:
             employee = workforce.get_employee_by_id(existing.employee_id)
