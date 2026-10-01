@@ -21,7 +21,7 @@ PIN/QR fallback, Face Liveness and managed-device lock task mode are subsequent 
 
 - JDK 17.
 - Gradle 9.6.
-- Android SDK 37.
+- Android SDK 36 (stable).
 - Android 7.0 / API 24 or newer for the device.
 
 ## Backend URL
