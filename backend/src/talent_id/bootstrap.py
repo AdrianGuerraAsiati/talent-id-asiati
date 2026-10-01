@@ -1,7 +1,8 @@
 from fastapi import FastAPI
 
 from talent_id import __version__
-from talent_id.modules.devices.api import kiosk_router, router as devices_router
+from talent_id.modules.devices.api import kiosk_router
+from talent_id.modules.devices.api import router as devices_router
 from talent_id.modules.workforce.api import router as workforce_router
 from talent_id.shared.config import get_settings
 
