@@ -1,13 +1,17 @@
 import hmac
+from typing import Annotated
 
 from fastapi import Depends, Header, HTTPException, status
 
 from talent_id.shared.config import Settings, get_settings
 
+InternalKey = Annotated[str, Header(alias="X-Internal-Key")]
+SettingsDependency = Annotated[Settings, Depends(get_settings)]
+
 
 def require_internal_key(
-    x_internal_key: str = Header(alias="X-Internal-Key"),
-    settings: Settings = Depends(get_settings),
+    x_internal_key: InternalKey,
+    settings: SettingsDependency,
 ) -> None:
     configured = settings.internal_api_key
     if configured is None:
