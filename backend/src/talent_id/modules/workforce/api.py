@@ -17,9 +17,14 @@ from talent_id.modules.workforce.schemas import (
     SiteCreate,
     SiteResponse,
 )
+from talent_id.shared.auth import require_internal_key
 from talent_id.shared.db import get_session
 
-router = APIRouter(prefix="/v1/workforce", tags=["workforce"])
+router = APIRouter(
+    prefix="/v1/workforce",
+    tags=["workforce"],
+    dependencies=[Depends(require_internal_key)],
+)
 
 
 def get_service(session: Session = Depends(get_session)) -> WorkforceService:
