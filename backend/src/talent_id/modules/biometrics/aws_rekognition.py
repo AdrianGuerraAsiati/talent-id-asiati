@@ -59,6 +59,10 @@ class RekognitionBiometricProvider:
             if face.get("FaceId")
         )
         if len(associated) != len(face_ids):
+            self._client.delete_faces(
+                CollectionId=self._collection_id,
+                FaceIds=list(face_ids),
+            )
             raise FaceAssociationError("indexed face could not be associated with employee")
 
         return EnrollmentResult(
