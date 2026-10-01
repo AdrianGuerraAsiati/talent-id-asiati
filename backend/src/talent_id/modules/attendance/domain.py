@@ -31,6 +31,8 @@ class AttendanceEvent:
     def __post_init__(self) -> None:
         if not self.idempotency_key.strip():
             raise ValueError("idempotency_key is required")
+        if self.occurred_at.tzinfo is None:
+            raise ValueError("occurred_at must be timezone-aware")
         if self.recognition_confidence is not None and not (
             0 <= self.recognition_confidence <= 100
         ):

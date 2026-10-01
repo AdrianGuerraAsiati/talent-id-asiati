@@ -3,6 +3,8 @@ from logging.config import fileConfig
 from sqlalchemy import engine_from_config, pool
 
 from alembic import context
+from talent_id.modules.attendance import models as attendance_models  # noqa: F401
+from talent_id.modules.biometrics import models as biometrics_models  # noqa: F401
 from talent_id.modules.devices import models as devices_models  # noqa: F401
 from talent_id.modules.workforce import models as workforce_models  # noqa: F401
 from talent_id.shared.config import get_settings

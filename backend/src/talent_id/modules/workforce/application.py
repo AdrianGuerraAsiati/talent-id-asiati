@@ -83,3 +83,9 @@ class WorkforceService:
         if employee is None:
             raise WorkforceNotFoundError("employee not found")
         return employee
+
+    def get_employee_by_id(self, employee_id: UUID) -> EmployeeProjection:
+        employee = self._repository.get_employee(employee_id)
+        if employee is None:
+            raise WorkforceNotFoundError("employee not found")
+        return employee
