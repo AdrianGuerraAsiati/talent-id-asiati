@@ -162,5 +162,14 @@ def test_enrollment_recognition_attendance_and_retry() -> None:
         assert retry_payload["attendance"]["created"] is False
         assert retry_payload["attendance"]["id"] == first_payload["attendance"]["id"]
         assert provider.recognize_calls == 1
+
+        conflict = client.post(
+            "/v1/kiosk/recognize",
+            headers=kiosk_headers,
+            data={"event_type": "check_out"},
+            files={"image": ("capture.jpg", b"kiosk-face", "image/jpeg")},
+        )
+        assert conflict.status_code == 409
+        assert provider.recognize_calls == 1
     finally:
         app.dependency_overrides.clear()
